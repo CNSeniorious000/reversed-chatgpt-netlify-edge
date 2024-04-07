@@ -116,11 +116,7 @@ export async function POST(request: Request) {
                     finish_reason: json.message.status === "in_progress" ? null : "stop",
                   },
                 ],
-                // @ts-ignore
-                raw: json,
               };
-
-              console.log(event);
 
               controller.enqueue(encoder.encode(`data: ${JSON.stringify(event)}\n\n`));
             }
