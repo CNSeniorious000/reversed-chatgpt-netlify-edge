@@ -1,0 +1,9 @@
+{
+  "devDependencies": {
+    "@types/node": "^20.12.5",
+    "openai": "^4.33.0"
+  },
+  "dependencies": {
+    "eventsource-parser": "^1.1.2"
+  }
+}
