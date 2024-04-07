@@ -1,10 +1,54 @@
-import type {
-  ChatCompletionChunk,
-  ChatCompletionCreateParams,
-} from "openai/src/resources/index.js";
+import type { ChatCompletionChunk, ChatCompletionCreateParams } from "openai/src/resources/index.js";
 import { createParser } from "eventsource-parser";
-import getSession, { randomUUID } from "../../../../utils/session";
-import headers, { apiUrl } from "../../../../utils/headers";
+
+export const baseUrl = "https://chat.openai.com";
+export const apiUrl = `${baseUrl}/backend-anon/conversation`;
+
+const headers = {
+  accept: "*/*",
+  "accept-language": "en-US,en;q=0.9",
+  "cache-control": "no-cache",
+  "content-type": "application/json",
+  "oai-language": "en-US",
+  origin: baseUrl,
+  pragma: "no-cache",
+  referer: baseUrl,
+  "sec-ch-ua": '"Google Chrome";v="123", "Not:A-Brand";v="8", "Chromium";v="123"',
+  "sec-ch-ua-mobile": "?0",
+  "sec-ch-ua-platform": '"Windows"',
+  "sec-fetch-dest": "empty",
+  "sec-fetch-mode": "cors",
+  "sec-fetch-site": "same-origin",
+  "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+};
+
+function randomUUID() {
+  let d = new Date().getTime();
+  if (typeof performance !== "undefined" && typeof performance.now === "function") {
+    d += performance.now();
+  }
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+    const r = (d + Math.random() * 16) % 16 | 0;
+    d = Math.floor(d / 16);
+    return (c === "x" ? r : (r & 0x3) | 0x8).toString(16);
+  });
+}
+
+async function getSession() {
+  let device = randomUUID();
+
+  const res = await fetch(`${baseUrl}/backend-anon/sentinel/chat-requirements`, {
+    method: "POST",
+    headers: {
+      ...headers,
+      "oai-device-id": device,
+    },
+  }).then((r) => r.text());
+
+  console.log(res);
+
+  return { device, token: JSON.parse(res).token };
+}
 
 export async function POST(request: Request) {
   const { device, token } = await getSession();
@@ -69,8 +113,7 @@ export async function POST(request: Request) {
                   {
                     delta: { content: delta },
                     index: 0,
-                    finish_reason:
-                      json.message.status === "in_progress" ? null : "stop",
+                    finish_reason: json.message.status === "in_progress" ? null : "stop",
                   },
                 ],
                 // @ts-ignore
@@ -79,9 +122,7 @@ export async function POST(request: Request) {
 
               console.log(event);
 
-              controller.enqueue(
-                encoder.encode(`data: ${JSON.stringify(event)}\n\n`),
-              );
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify(event)}\n\n`));
             }
           }
         });
@@ -95,6 +136,6 @@ export async function POST(request: Request) {
       status: res.status,
       statusText: res.statusText,
       headers: { "content-type": "text/event-stream; charset=utf8" },
-    },
+    }
   );
 }
