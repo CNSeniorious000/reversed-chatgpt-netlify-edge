@@ -27,9 +27,9 @@ export default async function () {
         "oai-device-id": device,
       },
     },
-  ).then((r) => r.json());
+  ).then((r) => r.text());
 
   console.log(res);
 
-  return { device, token: res.token };
+  return { device, token: JSON.parse(res).token };
 }
