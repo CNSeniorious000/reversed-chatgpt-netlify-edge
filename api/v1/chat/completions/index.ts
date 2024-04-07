@@ -3,8 +3,8 @@ import type {
   ChatCompletionCreateParams,
 } from "openai/src/resources/index.js";
 import { createParser } from "eventsource-parser";
-import getSession, { randomUUID } from "./utils/session";
-import headers, { apiUrl } from "./utils/headers";
+import getSession, { randomUUID } from "../../../../utils/session";
+import headers, { apiUrl } from "../../../../utils/headers";
 
 export async function POST(request: Request) {
   const { device, token } = await getSession();
