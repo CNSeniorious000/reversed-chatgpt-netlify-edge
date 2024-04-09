@@ -99,8 +99,8 @@ export async function POST(request: Request) {
 
             const json = JSON.parse(data);
 
-            if (json.message.author.role === "assistant") {
-              const now: string = json.message.content.parts.join("");
+            if (json.message.author.role === "assistant" && json.message.metadata.message_type === "next") {
+              const now: string = json.message.content.parts.at(-1);
               const delta = now.replace(last, "");
               last = now;
 
