@@ -90,7 +90,7 @@ export async function POST(request: Request) {
         let last = "";
 
         const parser = createParser((event) => {
-          if (event.type === "event") {
+          if (event.type === "event" && event.event !== "ping") {
             const { data } = event;
 
             if (data === "[DONE]") {
