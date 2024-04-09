@@ -1,6 +1,7 @@
 {
   "type": "module",
   "devDependencies": {
+    "@netlify/edge-functions": "^2.5.1",
     "@types/node": "^20.12.5",
     "openai": "^4.33.0"
   },

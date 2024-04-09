@@ -1,5 +1,6 @@
 import type { ChatCompletionChunk, ChatCompletionCreateParams } from "openai/src/resources/index.js";
 import { createParser } from "eventsource-parser";
+import { Config } from "@netlify/edge-functions";
 
 export const baseUrl = "https://chat.openai.com";
 export const apiUrl = `${baseUrl}/backend-anon/conversation`;
@@ -135,3 +136,13 @@ export async function POST(request: Request) {
     }
   );
 }
+
+export default (request: Request) => {
+  if (request.method === "POST") {
+    return POST(request);
+  }
+
+  return new Response(null, { status: 405 });
+};
+
+export const config: Config = { path: "/v1/chat/completions" };
