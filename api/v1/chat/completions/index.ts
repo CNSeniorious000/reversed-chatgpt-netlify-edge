@@ -118,8 +118,28 @@ export async function POST(request: Request) {
                   },
                 ],
               };
-
-              controller.enqueue(encoder.encode(`data: ${JSON.stringify(event)}\n\n`));
+              if (inputBody.stream) {
+                controller.enqueue(encoder.encode(`data: ${JSON.stringify(event)}\n\n`));
+              } else if (json.message.status === "finished_successfully") {
+                controller.enqueue(
+                  encoder.encode(
+                    JSON.stringify({
+                      id: json.message.id,
+                      created: Math.round(json.message.create_time),
+                      model: inputBody.model,
+                      choices: [
+                        {
+                          message: { content: now, role: "assistant" },
+                          index: 0,
+                          finish_reason: "stop",
+                        },
+                      ],
+                    })
+                  )
+                );
+                controller.close();
+                return;
+              }
             }
           }
         });
@@ -132,7 +152,7 @@ export async function POST(request: Request) {
     {
       status: res.status,
       statusText: res.statusText,
-      headers: { "content-type": "text/event-stream; charset=utf8" },
+      headers: { "content-type": inputBody.stream ? "text/event-stream; charset=utf-8" : "application/json" },
     }
   );
 }
